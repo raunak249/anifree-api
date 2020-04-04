@@ -1,1 +1,1 @@
-worker: gunicorn anime_api:app
+web: gunicorn anime_api:app
