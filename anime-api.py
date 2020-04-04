@@ -52,7 +52,6 @@ def get_recent_anime():
     return recent_anime
 
 app = Flask(__name__)
-app.config['DEBUG'] = False
 
 @app.route('/')
 def home():
@@ -62,4 +61,5 @@ def home():
     api_response.headers['Content-Type'] = 'application/json'
     return api_response
 
-app.run()
+if __name__ == "__main__":
+    app.run()
