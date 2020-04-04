@@ -53,7 +53,7 @@ def get_recent_anime():
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/recent_anime')
 def home():
     response = get_recent_anime()
     if response:
