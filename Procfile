@@ -1,1 +1,1 @@
-web: gunicorn anime_api:app
+web: gunicorn --bind 0.0.0.0:$PORT anime_api:app
