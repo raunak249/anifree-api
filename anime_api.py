@@ -77,13 +77,22 @@ def get_popular_anime():
 
 def get_anime_desc(url):
     categories = []
+    episode_links = []
+    episode_names = []
     response = requests.get(url)
     soup = BeautifulSoup(response.content)
     description = soup.find('div',{'class' : 'infodes2'}).text
     category_tags = soup.findAll('div',{'class' : 'infodes2'})[1].find('div',{'class':'textc'}).findAll('a',{'class':'infoan'})
+    episode_tags = soup.find('div',{'class' : 'infoepbox'}).findAll('a',{'class':'infovan'})
+
+    for episode_tag in episode_tags:
+        episode_link = episode_tag.get('href')
+        episode_links.append('/'+episode_link)
+        episode_name = episode_tag.find('div',{'class':'infoept2'}).find('div',{'class':'centerv'}).text.strip()
+        episode_names.append(episode_name)
     for category_tag in category_tags:
         categories.append(category_tag.text)
-    info =  {'desc' : description.strip(),'categories':categories}
+    info =  {'desc' : description.strip(),'categories':categories,'episode_links':episode_links,'episode_names':episode_names}
     return info
 
 app = Flask(__name__)
