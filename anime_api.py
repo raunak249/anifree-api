@@ -11,11 +11,11 @@ ROOT_URL = 'https://animekisa.tv'
 CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sanbox")
 chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 #"C:/Windows/chromedriver.exe"
-browser = webdriver.Chrome(executable_path="C:/Windows/chromedriver.exe",chrome_options=chrome_options)
 '''
 Anime :
     anime_name
@@ -107,6 +107,7 @@ def get_anime_desc(url):
     return info
 
 def get_video_link(url):
+    browser = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
     browser.get(url)
     elem = browser.find_element_by_xpath('//*[@id="main"]/div[7]/div')
     elem.click()
