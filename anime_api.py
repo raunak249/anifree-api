@@ -3,8 +3,19 @@ import urllib
 import requests
 from flask import Flask, jsonify, make_response,request
 import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import os
 
 ROOT_URL = 'https://animekisa.tv'
+CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sanbox")
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+#"C:/Windows/chromedriver.exe"
+browser = webdriver.Chrome(executable_path="C:/Windows/chromedriver.exe",chrome_options=chrome_options)
 '''
 Anime :
     anime_name
@@ -95,7 +106,35 @@ def get_anime_desc(url):
     info =  {'desc' : description.strip(),'categories':categories,'episode_links':episode_links,'episode_names':episode_names}
     return info
 
+def get_video_link(url):
+    browser.get(url)
+    elem = browser.find_element_by_xpath('//*[@id="main"]/div[7]/div')
+    elem.click()
+    browser.switch_to.window(browser.window_handles[1])
+    iframe = browser.find_elements_by_tag_name('iframe')[0]
+    browser.switch_to_frame(iframe)
+    buttons = browser.find_elements_by_xpath("//*[contains(text(), 'Download Xstreamcdn')]")
+    buttons[0].click()
+    browser.switch_to.window(browser.window_handles[2])
+    video_link = browser.current_url
+    link_parts = video_link.split('/')
+    first_part = '/'.join(link_parts[:-2])
+    last_part = link_parts[-1]
+    video_link = {'video_link' : first_part+'/v/'+last_part}
+    browser.quit()
+    return video_link
+
+
 app = Flask(__name__)
+
+@app.route('/video_link')
+def fetch_video_link():
+    url = request.args.get('url')
+    response = get_video_link(url)
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
 
 @app.route('/recent_anime')
 def fetch_recent_anime():
