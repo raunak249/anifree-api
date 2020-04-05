@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import urllib
 import requests
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response,request
 import time
 
 ROOT_URL = 'https://animekisa.tv'
@@ -75,6 +75,17 @@ def get_popular_anime():
         popular_animes.append(popular_anime)
     return popular_animes
 
+def get_anime_desc(url):
+    categories = []
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content)
+    description = soup.find('div',{'class' : 'infodes2'}).text
+    category_tags = soup.findAll('div',{'class' : 'infodes2'})[1].find('div',{'class':'textc'}).findAll('a',{'class':'infoan'})
+    for category_tag in category_tags:
+        categories.append(category_tag.text)
+    info =  {'desc' : description.strip(),'categories':categories}
+    return info
+
 app = Flask(__name__)
 
 @app.route('/recent_anime')
@@ -88,6 +99,15 @@ def fetch_recent_anime():
 @app.route('/popular_anime')
 def fetch_popular_anime():
     response = get_popular_anime()
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
+
+@app.route('/anime_info')
+def fetch_anime_info():
+    url = request.args.get('url')
+    response = get_anime_desc(url)
     if response:
         api_response = make_response(jsonify(response),200)
     api_response.headers['Content-Type'] = 'application/json'
