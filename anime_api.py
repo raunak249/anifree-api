@@ -46,7 +46,7 @@ def get_recent_anime():
         recent_anime_info = {
             'link' : str(anime_div.find('a',{'class' : 'an'}).get('href')), 
             'name' : str(anime_div.find('div',{'class' : 'title-box-2'}).text),
-            'episode_num' : str(anime_div.find('div',{'class' : 'centerv2'}).text.split('/')[0]),
+            'episode_num' : str(anime_div.find('div',{'class' : 'centerv2'}).text.split('/')[0][:-2].strip()),
             'image_link' : str(anime_div.find('div',{'class' : 'image-box'}).find('img').get('src'))
         }
         recent_anime.append(recent_anime_info)
