@@ -50,10 +50,6 @@ def get_recent_anime():
     anime_divs.append(soup.find_all('div',{'class' : div_classes[1]})[2])
     anime_divs.append(soup.find_all('div',{'class' : div_classes[2]})[1])
     anime_divs.append(soup.find_all('div',{'class' : div_classes[1]})[3])
-
-
-
-
     for anime_div in anime_divs:
         recent_anime_info = {
             'link' : str(anime_div.find('a',{'class' : 'an'}).get('href')), 
@@ -64,11 +60,34 @@ def get_recent_anime():
         recent_anime.append(recent_anime_info)
     return recent_anime
 
+def get_popular_anime():
+    url = ROOT_URL + str('/popular')
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content)
+    animes = soup.findAll('a',{'class':'an'})[:10]
+    popular_animes = []
+    for anime in animes:
+        popular_anime = {
+            'image_link' : str(anime.find('div',{'class':'similarpic'}).find('img').get('src')),
+            'name' : str(anime.find('div',{'class':'similardd'}).text)[3:].strip(),
+            'anime_link' : str(anime.get('href'))
+        }
+        popular_animes.append(popular_anime)
+    return popular_animes
+
 app = Flask(__name__)
 
 @app.route('/recent_anime')
-def show_recent_anime():
+def fetch_recent_anime():
     response = get_recent_anime()
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
+
+@app.route('/popular_anime')
+def fetch_popular_anime():
+    response = get_popular_anime()
     if response:
         api_response = make_response(jsonify(response),200)
     api_response.headers['Content-Type'] = 'application/json'
