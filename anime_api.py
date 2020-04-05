@@ -31,8 +31,11 @@ def search_anime(anime_name):
         print(link.get('href'))
 
 def get_recent_anime():
+    '''
+    To get 5 most recently released anime
+    '''
     recent_anime = []
-    div_classes = ['episode-box test','episode-box test ep-second','episode-box test ep-third']
+    div_classes = ['episode-box test','episode-box test ep-second','episode-box test ep-third','episode-box test ep-second ep-third']
     url = ROOT_URL
     response = requests.get(url)
     soup = BeautifulSoup(response.content)
@@ -42,6 +45,15 @@ def get_recent_anime():
     anime_divs.append(soup.find_all('div',{'class' : div_classes[2]})[0])
     anime_divs.append(soup.find_all('div',{'class' : div_classes[1]})[1])
     anime_divs.append(soup.find_all('div',{'class' : div_classes[0]})[1])
+    anime_divs.append(soup.find_all('div',{'class' : div_classes[3]})[0])
+    anime_divs.append(soup.find_all('div',{'class' : div_classes[0]})[2])
+    anime_divs.append(soup.find_all('div',{'class' : div_classes[1]})[2])
+    anime_divs.append(soup.find_all('div',{'class' : div_classes[2]})[1])
+    anime_divs.append(soup.find_all('div',{'class' : div_classes[1]})[3])
+
+
+
+
     for anime_div in anime_divs:
         recent_anime_info = {
             'link' : str(anime_div.find('a',{'class' : 'an'}).get('href')), 
