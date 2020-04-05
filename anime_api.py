@@ -14,7 +14,7 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sanbox")
-chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
 #"C:/Windows/chromedriver.exe"
 '''
 Anime :
