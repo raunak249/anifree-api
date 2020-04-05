@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import urllib
 import requests
 from flask import Flask, jsonify, make_response
+import time
 
 ROOT_URL = 'https://animekisa.tv'
 '''
@@ -45,7 +46,7 @@ def get_recent_anime():
         recent_anime_info = {
             'link' : str(anime_div.find('a',{'class' : 'an'}).get('href')), 
             'name' : str(anime_div.find('div',{'class' : 'title-box-2'}).text),
-            'episode_num' : str(anime_div.find('div',{'class' : 'centerv2'}).text[:9]),
+            'episode_num' : str(anime_div.find('div',{'class' : 'centerv2'}).text.split('/')[0]),
             'image_link' : str(anime_div.find('div',{'class' : 'image-box'}).find('img').get('src'))
         }
         recent_anime.append(recent_anime_info)
@@ -54,10 +55,16 @@ def get_recent_anime():
 app = Flask(__name__)
 
 @app.route('/recent_anime')
-def home():
+def show_recent_anime():
     response = get_recent_anime()
     if response:
         api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
+
+@app.route('/')
+def home():
+    api_response = make_response({'time':str(time.strftime('%A %B, %d %Y %H:%M:%S'))},200)
     api_response.headers['Content-Type'] = 'application/json'
     return api_response
 
