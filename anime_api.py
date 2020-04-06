@@ -16,8 +16,8 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sanbox")
-#chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
-chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
+#chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 '''
 Anime :
     anime_name
@@ -78,7 +78,7 @@ def get_popular_anime():
     return popular_animes
 
 def get_anime_desc(url):
-    driver = webdriver.Chrome(executable_path='C:/Windows/chromedriver.exe',chrome_options=chrome_options)
+    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
     categories = []
     episode_links = []
     episode_names = []
