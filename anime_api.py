@@ -36,14 +36,18 @@ Episode :
 
 
 def search_anime(anime_name):
-    search_url = 'https://animekisa.tv/search?q=' + str(anime_name)
+    search_url = 'https://www17.gogoanime.io//search.html?keyword=' + str(anime_name)
     response = requests.get(search_url)
     soup = BeautifulSoup(response.content)
-    divs = soup.find_all('div',{'class' :'similarbox'})
-    div = divs[0]
-    links = div.find_all('a',{'class' : 'an'})
-    for link in links:
-        print(link.get('href'))
+    search_results = []
+    anime_list = soup.find('ul',{'class' : 'items'}).find_all('li')
+    for anime in anime_list:
+        recent_anime = {'image_link' : anime.find('img').get('src'),
+                        'link' : ROOT_URL + anime.find('a').get('href'),
+                        'name' : anime.find('p',{'class' : 'name'}).text
+                        }
+        search_results.append(recent_anime)
+    return search_results
 
 def get_recent_anime():
     '''
@@ -126,6 +130,15 @@ def get_video_link(url):
     return link
 
 app = Flask(__name__)
+
+@app.route('/search')
+def fetch_search_results():
+    term = request.args.get('search')
+    response = search_anime(term)
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
 
 @app.route('/video_link')
 def fetch_video_link():
