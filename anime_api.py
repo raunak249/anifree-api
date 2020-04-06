@@ -105,9 +105,36 @@ def get_anime_desc(url):
     info =  {'desc' : description.strip(),'categories':categories,'episode_links':episode_links,'episode_names':episode_names}
     driver.quit()
     return info
-#get_anime_desc("https://www17.gogoanime.io/category/boruto-naruto-next-generations")
+
+def get_video_link(url):
+    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content)
+    video_link = soup.find('li',{'class' : 'anime'}).find('a').get('data-video')
+    driver.get('https:' + video_link)
+    time.sleep(3)
+    button = driver.find_element_by_xpath('/html/body/div/div/div[3]/div[2]/div[12]/div[1]/div/div/div[2]/div')
+    action = webdriver.common.action_chains.ActionChains(driver)
+    action.move_to_element_with_offset(button, 1, 1)
+    action.click()
+    action.perform()
+    action.click()
+    action.perform()
+    soup = BeautifulSoup(driver.page_source)
+    driver.quit()
+    link = {'video_link' : soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')}
+    return link
 
 app = Flask(__name__)
+
+@app.route('/video_link')
+def fetch_video_link():
+    url = request.args.get('url')
+    response = get_video_link(url)
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
 
 @app.route('/recent_anime')
 def fetch_recent_anime():
