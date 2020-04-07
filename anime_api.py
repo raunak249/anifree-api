@@ -114,20 +114,20 @@ def get_video_link(url):
     driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
     response = requests.get(url)
     soup = BeautifulSoup(response.content)
-    video_link = soup.find('li',{'class' : 'anime'}).find('a').get('data-video')
-    driver.get('https:' + video_link)
+    video_link = soup.find('li',{'class' : 'xstreamcdn'}).find('a').get('data-video')
+    driver.get(video_link)
     time.sleep(3)
-    button = driver.find_element_by_xpath('/html/body/div/div/div[3]/div[2]/div[12]/div[1]/div/div/div[2]/div')
+    button = driver.find_element_by_xpath('//*[@id="loading"]/div')
     action = webdriver.common.action_chains.ActionChains(driver)
     action.move_to_element_with_offset(button, 1, 1)
     action.click()
     action.perform()
-    action.click()
-    action.perform()
+    time.sleep(1)
     soup = BeautifulSoup(driver.page_source)
     driver.quit()
     link = {'video_link' : soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')}
     return link
+
 
 app = Flask(__name__)
 
