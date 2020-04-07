@@ -18,20 +18,6 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sanbox")
 #chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
 chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-'''
-Anime :
-    anime_name
-    description
-    main_image
-    no_of_episodes
-    Episodes[]
-
-Episode :
-    episode_name
-    thumbnail
-    duration
-    video_link
-'''
 
 
 
@@ -50,9 +36,6 @@ def search_anime(anime_name):
     return search_results
 
 def get_recent_anime():
-    '''
-    To get 5 most recently released anime
-    '''
     recent_animes = []
     url = ROOT_URL
     response = requests.get(url)
