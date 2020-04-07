@@ -16,8 +16,8 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sanbox")
-chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
-#chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+#chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 '''
 Anime :
     anime_name
@@ -122,12 +122,13 @@ def get_video_link(url):
     action.move_to_element_with_offset(button, 1, 1)
     action.click()
     action.perform()
-    time.sleep(1)
+    time.sleep(3)
     soup = BeautifulSoup(driver.page_source)
+    video_link = soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')
+    driver.get(video_link)
+    link = {'video_link' : driver.current_url }
     driver.quit()
-    link = {'video_link' : soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')}
     return link
-
 
 app = Flask(__name__)
 
