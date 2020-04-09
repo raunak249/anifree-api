@@ -53,7 +53,7 @@ def get_recent_anime():
                         }
         recent_animes.append(recent_anime)
     
-    print(recent_animes)
+    print(soup)
     return recent_animes
 
 def get_popular_anime():
