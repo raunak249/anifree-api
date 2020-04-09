@@ -29,7 +29,7 @@ def good_image(url):
 def search_anime(anime_name):
     search_url = 'https://myanimelist.net/search/all?q=' + str(anime_name)
     response = requests.get(search_url)
-    soup = BeautifulSoup(response.content)
+    soup = BeautifulSoup(response.content,'lxml')
     search_results = []
     anime_list = soup.findAll('article')[0].findAll('div',{'class':'list di-t w100'})
     for anime in anime_list:
@@ -44,7 +44,7 @@ def get_recent_anime():
     recent_animes = []
     url = ROOT_URL
     response = requests.get(url)
-    soup = BeautifulSoup(response.content)
+    soup = BeautifulSoup(response.content,'lxml')
     anime_list = soup.findAll('div',{'class' : 'widget-slide-outer'})[1].findAll('li',{'class' : 'btn-anime episode'})
     for anime in anime_list:
         recent_anime = {'episode_num' : anime.find('div',{'class':'link episode js-widget-episode-video-link'}).find('div',{'class' : 'title di-b'}).find('a').text,
@@ -53,6 +53,7 @@ def get_recent_anime():
                         }
         recent_animes.append(recent_anime)
     
+    print(recent_animes)
     return recent_animes
 
 def get_popular_anime():
