@@ -117,14 +117,14 @@ def fetch_search_results():
     api_response.headers['Content-Type'] = 'application/json'
     return api_response
 
-@app.route('/video_link')
-def fetch_video_link():
-    url = request.args.get('url')
-    response = get_video_link(url)
-    if response:
-        api_response = make_response(jsonify(response),200)
-    api_response.headers['Content-Type'] = 'application/json'
-    return api_response
+# @app.route('/video_link')
+# def fetch_video_link():
+#     url = request.args.get('url')
+#     response = get_video_link(url)
+#     if response:
+#         api_response = make_response(jsonify(response),200)
+#     api_response.headers['Content-Type'] = 'application/json'
+#     return api_response
 
 @app.route('/recent_anime')
 def fetch_recent_anime():
