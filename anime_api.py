@@ -43,7 +43,7 @@ def search_anime(anime_name):
 def get_recent_anime():
     recent_animes = []
     url = ROOT_URL
-    response = requests.get(url)
+    response = requests.get('https://myanimelist.net/')
     soup = BeautifulSoup(response.content,'lxml')
     anime_list = soup.findAll('div',{'class' : 'widget-slide-outer'})[1].findAll('li',{'class' : 'btn-anime episode'})
     for anime in anime_list:
