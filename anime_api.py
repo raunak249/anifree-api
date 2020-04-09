@@ -41,10 +41,13 @@ def search_anime(anime_name):
     return search_results
 
 def get_recent_anime():
+    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
     recent_animes = []
     url = ROOT_URL
-    response = requests.get('https://myanimelist.net/')
-    soup = BeautifulSoup(response.content,'lxml')
+    driver.get(url)
+    time.sleep(2)
+    soup = BeautifulSoup(driver.page_source)
+    driver.quit()
     anime_list = soup.findAll('div',{'class' : 'widget-slide-outer'})[1].findAll('li',{'class' : 'btn-anime episode'})
     for anime in anime_list:
         recent_anime = {'episode_num' : anime.find('div',{'class':'link episode js-widget-episode-video-link'}).find('div',{'class' : 'title di-b'}).find('a').text,
