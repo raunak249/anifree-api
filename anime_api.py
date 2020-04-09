@@ -16,8 +16,8 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sanbox")
-chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
-#chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+#chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 
 
 def good_image(url):
@@ -41,18 +41,15 @@ def search_anime(anime_name):
     return search_results
 
 def get_recent_anime():
-    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
     recent_animes = []
     url = ROOT_URL
-    driver.get(url)
-    time.sleep(2)
-    soup = BeautifulSoup(driver.page_source)
-    driver.quit()
-    anime_list = soup.findAll('div',{'class' : 'widget-slide-outer'})[1].findAll('li',{'class' : 'btn-anime episode'})
+    response = requests.get('https://myanimelist.net/watch/episode')
+    soup = BeautifulSoup(response.content,'lxml')
+    anime_list = soup.findAll('div',{'class' : 'video-list-outer-vertical'})
     for anime in anime_list:
-        recent_anime = {'episode_num' : anime.find('div',{'class':'link episode js-widget-episode-video-link'}).find('div',{'class' : 'title di-b'}).find('a').text,
-                        'image_link' : good_image(anime.find('div',{'class':'link episode js-widget-episode-video-link'}).find('img').get('data-src')),
-                        'name' : anime.find('div',{'class':'link episode js-widget-episode-video-link'}).get('data-title')
+        recent_anime = {'episode_num' : anime.find('div',{'class' : 'title di-b'}).find('a').text,
+                        'image_link' : anime.find('img').get('data-src'),
+                        'name' : anime.find('div',{'class':'video-info-title'}).findAll('a')[1].text
                         }
         recent_animes.append(recent_anime)
     
@@ -117,14 +114,14 @@ def fetch_search_results():
     api_response.headers['Content-Type'] = 'application/json'
     return api_response
 
-# @app.route('/video_link')
-# def fetch_video_link():
-#     url = request.args.get('url')
-#     response = get_video_link(url)
-#     if response:
-#         api_response = make_response(jsonify(response),200)
-#     api_response.headers['Content-Type'] = 'application/json'
-#     return api_response
+@app.route('/video_link')
+def fetch_video_link():
+    url = request.args.get('url')
+    response = get_video_link(url)
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
 
 @app.route('/recent_anime')
 def fetch_recent_anime():
