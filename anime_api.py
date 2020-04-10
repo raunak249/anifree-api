@@ -16,7 +16,7 @@ search_query = '''query($search : String) { # Define which variables will be use
                             duration,
                             averageScore,
                             coverImage{
-                                large
+                                extraLarge
                             }
                         }
                      }
@@ -34,7 +34,7 @@ query { # Define which variables will be used in the query (id)
       duration,
       averageScore,
       coverImage{
-        large
+        extraLarge
       }
     }
   }
@@ -57,7 +57,7 @@ query { # Define which variables will be used in the query (id)
       averageScore,
       meanScore
       coverImage{
-        large
+        extraLarge
       }
     }
   }
@@ -73,7 +73,7 @@ def search_anime(anime_name):
     anime_list = response.json()
     search_results = []
     for anime in anime_list['data']['Page']['media']:
-        search_result = {'image_link' : anime['coverImage']['large'],
+        search_result = {'image_link' : anime['coverImage']['extraLarge'],
                         'description' : anime['description'],
                         'name' : anime['title']['romaji']
                         }
@@ -86,7 +86,7 @@ def get_recent_anime():
     anime_list = response.json()
     search_results = []
     for anime in anime_list['data']['Page']['media']:
-        search_result = {'image_link' : anime['coverImage']['large'],
+        search_result = {'image_link' : anime['coverImage']['extraLarge'],
                         'description' : anime['description'],
                         'episode_num' : anime['nextAiringEpisode']['episode'],
                         'name' : anime['title']['romaji']
@@ -99,7 +99,7 @@ def get_popular_anime():
     anime_list = response.json()
     results = []
     for anime in anime_list['data']['Page']['media']:
-        search_result = {'image_link' : anime['coverImage']['large'],
+        search_result = {'image_link' : anime['coverImage']['extraLarge'],
                         'description' : anime['description'],
                         'name' : anime['title']['romaji']
                         }
