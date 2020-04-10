@@ -1,6 +1,8 @@
 import urllib
 import requests
 from flask import Flask, jsonify, make_response, request
+import re
+import time
 
 ROOT_URL = 'https://graphql.anilist.co'
 search_query = '''query($search : String) { # Define which variables will be used in the query (id)
@@ -63,7 +65,10 @@ query { # Define which variables will be used in the query (id)
   }
 }
 '''
-
+def cleanhtml(raw_html):
+  cleanr = re.compile('<.*?>')
+  cleantext = re.sub(cleanr, '', raw_html)
+  return cleantext
 
 def search_anime(anime_name):
     search_variable = {
@@ -74,7 +79,7 @@ def search_anime(anime_name):
     search_results = []
     for anime in anime_list['data']['Page']['media']:
         search_result = {'image_link' : anime['coverImage']['extraLarge'],
-                        'description' : anime['description'],
+                        'description' : cleanhtml(anime['description']),
                         'name' : anime['title']['romaji']
                         }
         search_results.append(search_result)
@@ -87,7 +92,7 @@ def get_recent_anime():
     search_results = []
     for anime in anime_list['data']['Page']['media']:
         search_result = {'image_link' : anime['coverImage']['extraLarge'],
-                        'description' : anime['description'],
+                        'description' : cleanhtml(anime['description']),
                         'episode_num' : anime['nextAiringEpisode']['episode'],
                         'name' : anime['title']['romaji']
                         }
@@ -100,7 +105,7 @@ def get_popular_anime():
     results = []
     for anime in anime_list['data']['Page']['media']:
         search_result = {'image_link' : anime['coverImage']['extraLarge'],
-                        'description' : anime['description'],
+                        'description' : cleanhtml(anime['description']),
                         'name' : anime['title']['romaji']
                         }
         results.append(search_result)
