@@ -57,7 +57,6 @@ query { # Define which variables will be used in the query (id)
       description(asHtml:false),
       duration,
       averageScore,
-      meanScore
       coverImage{
         extraLarge
       }
@@ -93,8 +92,9 @@ def get_recent_anime():
     for anime in anime_list['data']['Page']['media']:
         search_result = {'image_link' : anime['coverImage']['extraLarge'],
                         'description' : cleanhtml(anime['description']),
-                        'episode_num' : anime['nextAiringEpisode']['episode'],
-                        'name' : anime['title']['romaji']
+                        'episode_num' : anime['nextAiringEpisode']['episode'] - 1,
+                        'name' : anime['title']['romaji'],
+                        'time_remaining' : anime['nextAiringEpisode']['timeUntilAiring']
                         }
         search_results.append(search_result)
     return search_results
