@@ -1,107 +1,131 @@
-from bs4 import BeautifulSoup
 import urllib
 import requests
-from flask import Flask, jsonify, make_response,request
-import time
-from selenium import webdriver
-import os
+from flask import Flask, jsonify, make_response, request
 
+ROOT_URL = 'https://graphql.anilist.co'
+search_query = '''query($search : String) { # Define which variables will be used in the query (id)
+                    Page(page:1,perPage:100){
+                        media(type:ANIME,search:$search){
+                            title{
+                                romanji
+                            },
+                            status,
+                            description,
+                            season,
+                            episodes,
+                            duration,
+                            averageScore,
+                            coverImage{
+                                large
+                            }
+                        }
+                     }
+                }'''
+popular_query  = '''
+query { # Define which variables will be used in the query (id)
+  Page(page:1,perPage:10){
+    media(type:ANIME,sort :POPULARITY_DESC){
+      title{
+        romanji,
+      },
+      status,
+      description,
+      episodes,
+      duration,
+      averageScore,
+      coverImage{
+        large
+      }
+    }
+  }
+}'''
 
-ROOT_URL = 'https://myanimelist.net'
-CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--start-maximized")
-chrome_options.add_argument("--window-size=1920,1080")
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--no-sanbox")
-#chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
-chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+recent_query = '''
+query { # Define which variables will be used in the query (id)
+  Page(page:1,perPage:10){
+    media(type:ANIME,status :RELEASING,sort:TRENDING_DESC){
+      title{
+        romaji
+      },
+      nextAiringEpisode {
+        timeUntilAiring
+        episode
+      },
+      status,
+      description(asHtml:false),
+      duration,
+      averageScore,
+      meanScore
+      coverImage{
+        large
+      }
+    }
+  }
+}
+'''
 
-
-def good_image(url):
-    lst = url.split('/')
-    del lst[3:5]
-    url = '/'.join(lst)
-    return url
 
 def search_anime(anime_name):
-    search_url = 'https://myanimelist.net/search/all?q=' + str(anime_name)
-    response = requests.get(search_url)
-    soup = BeautifulSoup(response.content,'lxml')
+    search_variable = {
+        'search': anime_name
+    }
+    response = requests.post(ROOT_URL, json={'query': search_query, 'variables': search_variable})
+    anime_list = response.json()
     search_results = []
-    anime_list = soup.findAll('article')[0].findAll('div',{'class':'list di-t w100'})
-    for anime in anime_list:
-        search_result = {'image_link' : good_image(anime.find('div',{'class':'picSurround di-tc thumb'}).find('img').get('data-src')),
-                        'link' : anime.find('div',{'class':'picSurround di-tc thumb'}).find('a').get('href'),
-                        'name' : anime.find('div',{'class':'information di-tc va-t pt4 pl8'}).find('a').text
+    for anime in anime_list['data']['Page']['media']:
+        search_result = {'image_link' : anime['coverImage']['large'],
+                        'description' : anime['description'],
+                        'name' : anime['title']['romaji']
                         }
         search_results.append(search_result)
     return search_results
 
+
 def get_recent_anime():
-    recent_animes = []
-    url = ROOT_URL
-    response = requests.get('https://myanimelist.net/watch/episode')
-    soup = BeautifulSoup(response.content,'lxml')
-    anime_list = soup.findAll('div',{'class' : 'video-list-outer-vertical'})
-    for anime in anime_list:
-        recent_anime = {'episode_num' : anime.find('div',{'class' : 'title di-b'}).find('a').text,
-                        'image_link' : anime.find('img').get('data-src'),
-                        'name' : anime.find('div',{'class':'video-info-title'}).findAll('a')[1].text
+    response = requests.post(ROOT_URL, json={'query': recent_query})
+    anime_list = response.json()
+    search_results = []
+    for anime in anime_list['data']['Page']['media']:
+        search_result = {'image_link' : anime['coverImage']['large'],
+                        'description' : anime['description'],
+                        'episode_num' : anime['nextAiringEpisode']['episode'],
+                        'name' : anime['title']['romaji']
                         }
-        recent_animes.append(recent_anime)
-    
-    print(soup)
-    return recent_animes
+        search_results.append(search_result)
+    return search_results
 
 def get_popular_anime():
-    url = ROOT_URL + '/topanime.php?type=airing'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content)
-    popular_animes =[]
-    anime_list = soup.find('table',{'class' : 'top-ranking-table'}).findAll('tr',{'class':'ranking-list'})
-    for anime in anime_list:
-        popular_anime = {'name' : anime.find('td',{'class' : 'title al va-t word-break'}).find('div',{'class':'detail'}).find('div',{'class' :'di-ib clearfix'}).find('a').text,
-                        'anime_link' : anime.find('td',{'class' : 'title al va-t word-break'}).find('a').get('href'),
-                        'image_link' : good_image(anime.find('td',{'class' : 'title al va-t word-break'}).find('a').find('img').get('data-src'))}
-        popular_animes.append(popular_anime)
-    return popular_animes
+    response = requests.post(ROOT_URL, json={'query': search_query})
+    anime_list = response.json()
+    results = []
+    for anime in anime_list['data']['Page']['media']:
+        search_result = {'image_link' : anime['coverImage']['large'],
+                        'description' : anime['description'],
+                        'name' : anime['title']['romaji']
+                        }
+        results.append(search_result)
+    return results
 
-def get_anime_desc(url):
-    categories = []
-    episode_names = []
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content)
-    description = soup.find('span',{'itemprop' : 'description'}).text
-    # category_tags = soup.find('div',{'class' : 'anime_info_body_bg'}).find_all('p',{'class':'type'})[2].findAll('a')
-    response = requests.get(url+'/episode')
-    soup = BeautifulSoup(response.content)
-    episodes = soup.find('span',{'class' : 'di-ib pl4 fw-n fs10'}).text.split('/')[0][1:]
-    episode_names = ['Episode '+ str(episode_name) for episode_name in range(1,int(episodes)+1)]
-    info =  {'desc' : str(description),'episode_names':episode_names}
-    return info
 
-def get_video_link(url):
-    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content)
-    video_link = soup.find('li',{'class' : 'xstreamcdn'}).find('a').get('data-video')
-    driver.get(video_link)
-    time.sleep(3)
-    button = driver.find_element_by_xpath('//*[@id="loading"]/div')
-    action = webdriver.common.action_chains.ActionChains(driver)
-    action.move_to_element_with_offset(button, 1, 1)
-    action.click()
-    action.perform()
-    time.sleep(3)
-    soup = BeautifulSoup(driver.page_source)
-    video_link = soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')
-    driver.get(video_link)
-    link = {'video_link' : driver.current_url }
-    driver.quit()
-    return link
+# def get_video_link(url):
+#     driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
+#     response = requests.get(url)
+#     soup = BeautifulSoup(response.content)
+#     video_link = soup.find('li',{'class' : 'xstreamcdn'}).find('a').get('data-video')
+#     driver.get(video_link)
+#     time.sleep(3)
+#     button = driver.find_element_by_xpath('//*[@id="loading"]/div')
+#     action = webdriver.common.action_chains.ActionChains(driver)
+#     action.move_to_element_with_offset(button, 1, 1)
+#     action.click()
+#     action.perform()
+#     time.sleep(3)
+#     soup = BeautifulSoup(driver.page_source)
+#     video_link = soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')
+#     driver.get(video_link)
+#     link = {'video_link' : driver.current_url }
+#     driver.quit()
+#     return link
 
 app = Flask(__name__)
 
@@ -109,15 +133,6 @@ app = Flask(__name__)
 def fetch_search_results():
     term = request.args.get('search')
     response = search_anime(term)
-    if response:
-        api_response = make_response(jsonify(response),200)
-    api_response.headers['Content-Type'] = 'application/json'
-    return api_response
-
-@app.route('/video_link')
-def fetch_video_link():
-    url = request.args.get('url')
-    response = get_video_link(url)
     if response:
         api_response = make_response(jsonify(response),200)
     api_response.headers['Content-Type'] = 'application/json'
@@ -139,14 +154,6 @@ def fetch_popular_anime():
     api_response.headers['Content-Type'] = 'application/json'
     return api_response
 
-@app.route('/anime_info')
-def fetch_anime_info():
-    url = request.args.get('url')
-    response = get_anime_desc(url)
-    if response:
-        api_response = make_response(jsonify(response),200)
-    api_response.headers['Content-Type'] = 'application/json'
-    return api_response
 
 @app.route('/')
 def home():
