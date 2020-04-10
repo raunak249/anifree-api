@@ -4,6 +4,21 @@ from flask import Flask, jsonify, make_response, request
 import re
 import time
 
+
+def ConvertSectoDay(n): 
+  
+    day = n // (24 * 3600) 
+  
+    n = n % (24 * 3600) 
+    hour = n // 3600
+  
+    n %= 3600
+    minutes = n // 60
+  
+    n %= 60
+    seconds = n 
+    return day
+
 ROOT_URL = 'https://graphql.anilist.co'
 search_query = '''query($search : String) { # Define which variables will be used in the query (id)
                     Page(page:1,perPage:100){
@@ -94,19 +109,20 @@ def get_recent_anime():
                         'description' : cleanhtml(anime['description']),
                         'episode_num' : anime['nextAiringEpisode']['episode'] - 1,
                         'name' : anime['title']['romaji'],
-                        'time_remaining' : anime['nextAiringEpisode']['timeUntilAiring']
+                        'time_remaining' : ConvertSectoDay(anime['nextAiringEpisode']['timeUntilAiring'])
                         }
         search_results.append(search_result)
     return search_results
 
 def get_popular_anime():
-    response = requests.post(ROOT_URL, json={'query': search_query})
+    response = requests.post(ROOT_URL, json={'query': popular_query})
     anime_list = response.json()
     results = []
     for anime in anime_list['data']['Page']['media']:
         search_result = {'image_link' : anime['coverImage']['extraLarge'],
                         'description' : cleanhtml(anime['description']),
-                        'name' : anime['title']['romaji']
+                        'name' : anime['title']['romaji'],
+                        'score' : anime['averageScore']
                         }
         results.append(search_result)
     return results
