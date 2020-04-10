@@ -7,7 +7,7 @@ search_query = '''query($search : String) { # Define which variables will be use
                     Page(page:1,perPage:100){
                         media(type:ANIME,search:$search){
                             title{
-                                romanji
+                                romaji
                             },
                             status,
                             description,
@@ -26,7 +26,7 @@ query { # Define which variables will be used in the query (id)
   Page(page:1,perPage:10){
     media(type:ANIME,sort :POPULARITY_DESC){
       title{
-        romanji,
+        romaji,
       },
       status,
       description,
