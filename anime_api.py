@@ -1,6 +1,6 @@
 import urllib
 import requests
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, jsonify, make_response, request, render_template_string
 import re
 import time
 from selenium import webdriver
@@ -93,6 +93,53 @@ query { # Define which variables will be used in the query (id)
     }
   }
 }
+'''
+html = '''
+<h1 id="anifree-api">anifree-api</h1>
+<p>An api made using Flask and Python built for the <a href="https://github.com/raunak249/anifree">AniFree app</a></p>
+<h1 id="how-is-it-built">How is it built</h1>
+<p>It is built using Flask for python and deployed to Heroku as an app. It itself uses the <a href="https://github.com/AniList/ApiV2-GraphQL-Docs">Anilist Api</a> to get information about anime.</p>
+<h1 id="directions-to-use">Directions to use</h1>
+<h2 id="method">Method</h2>
+<p> <code>GET</code></p>
+<h2 id="url">URL</h2>
+<p> <code>https://anifree-api.herokuapp.com/</code></p>
+<h2 id="endpoints">Endpoints</h2>
+<ul>
+<li><code>/recent_anime</code> : To get 10 most recent anime.</li>
+<li><code>/popular_anime</code> : To get 10 most trending anime.</li>
+<li><code>/search?search=SEARCH_TERM</code> : To search for a particular anime.</li>
+<li><code>/video_link?url=URL</code> : To get the video link of an episode using the <a href="gogoanime.io">GoGoanime</a> url of a particular episode.<h2 id="response">Response</h2>
+</li>
+<li><code>/recent_anime</code> :<pre><code class="lang-yaml">{
+<span class="hljs-symbol">'image_link</span>' : <span class="hljs-type">URL</span>,
+<span class="hljs-symbol">'description</span>' : <span class="hljs-type">STRING</span>,
+<span class="hljs-symbol">'episode_num</span>' : <span class="hljs-type">INT</span>,
+<span class="hljs-symbol">'name</span>' : <span class="hljs-type">STRING</span>,
+<span class="hljs-symbol">'time_remaining</span>' : <span class="hljs-type">INT</span>
+}
+</code></pre>
+</li>
+<li><code>/search?search=SEARCH_TERM</code> :<pre><code class="lang-yaml">{
+<span class="hljs-attr">"image_link"</span> : URL,
+<span class="hljs-attr">"description"</span> : STRING,
+<span class="hljs-attr">"name"</span> : STRING}
+</code></pre>
+</li>
+<li><code>/popular_anime</code> :<pre><code class="lang-yaml">{
+<span class="hljs-symbol">'image_link</span>' : <span class="hljs-type">URL</span>,
+<span class="hljs-symbol">'description</span>' : <span class="hljs-type">STRING</span>,
+<span class="hljs-symbol">'name</span>' : <span class="hljs-type">STRING</span>,
+<span class="hljs-symbol">'score</span>' : <span class="hljs-type">INT</span>
+}
+</code></pre>
+</li>
+<li><code>/video_link?url=URL</code> :<pre><code class="lang-yaml">{
+<span class="hljs-string">'video_link'</span> : driver<span class="hljs-selector-class">.current_url</span> 
+}
+</code></pre>
+</li>
+</ul>
 '''
 def cleanhtml(raw_html):
   cleanr = re.compile('<.*?>')
@@ -206,9 +253,8 @@ def fetch_video_link():
 
 @app.route('/')
 def home():
-    api_response = make_response({'time':str(time.strftime('%A %B, %d %Y %H:%M:%S'))},200)
-    api_response.headers['Content-Type'] = 'application/json'
-    return api_response
+  return render_template_string(html)
+    
 
 if __name__ == "__main__":
     app.run()
