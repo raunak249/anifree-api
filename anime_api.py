@@ -194,9 +194,12 @@ def fetch_popular_anime():
 @app.route('/video_link')
 def fetch_video_link():
     url = request.args.get('url')
-    response = get_video_link(url)
-    if response:
-        api_response = make_response(jsonify(response),200)
+    try:
+      response = get_video_link(url)
+      if response:
+          api_response = make_response(jsonify(response),200)
+    except:
+      api_response = make_response({'video_link':'null'},200)
     api_response.headers['Content-Type'] = 'application/json'
     return api_response
 
