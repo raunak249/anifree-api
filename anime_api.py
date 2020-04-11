@@ -3,6 +3,21 @@ import requests
 from flask import Flask, jsonify, make_response, request
 import re
 import time
+from selenium import webdriver
+import os
+from bs4 import BeautifulSoup
+
+
+CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--start-maximized")
+chrome_options.add_argument("--window-size=1920,1080")
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sanbox")
+#chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 
 
 def ConvertSectoDay(n): 
@@ -128,25 +143,26 @@ def get_popular_anime():
     return results
 
 
-# def get_video_link(url):
-#     driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
-#     response = requests.get(url)
-#     soup = BeautifulSoup(response.content)
-#     video_link = soup.find('li',{'class' : 'xstreamcdn'}).find('a').get('data-video')
-#     driver.get(video_link)
-#     time.sleep(3)
-#     button = driver.find_element_by_xpath('//*[@id="loading"]/div')
-#     action = webdriver.common.action_chains.ActionChains(driver)
-#     action.move_to_element_with_offset(button, 1, 1)
-#     action.click()
-#     action.perform()
-#     time.sleep(3)
-#     soup = BeautifulSoup(driver.page_source)
-#     video_link = soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')
-#     driver.get(video_link)
-#     link = {'video_link' : driver.current_url }
-#     driver.quit()
-#     return link
+def get_video_link(url):
+    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH,chrome_options=chrome_options)
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content)
+    video_link = soup.find('div',{'class' : 'anime_muti_link'}).find('a').get('data-video')
+    driver.get('http:'+video_link)
+    button = driver.find_element_by_xpath('//*[@id="myVideo"]/div[2]/div[4]')
+    action = webdriver.common.action_chains.ActionChains(driver)
+    action.move_to_element(button)
+    action.click()
+    action.perform()
+    action.click()
+    action.perform()
+    time.sleep(1)
+    soup = BeautifulSoup(driver.page_source)
+    video_link = soup.find('video',{'class' : 'jw-video jw-reset'}).get('src')
+    driver.get(video_link)
+    link = {'video_link' : driver.current_url }
+    driver.quit()
+    return link
 
 app = Flask(__name__)
 
@@ -170,6 +186,15 @@ def fetch_recent_anime():
 @app.route('/popular_anime')
 def fetch_popular_anime():
     response = get_popular_anime()
+    if response:
+        api_response = make_response(jsonify(response),200)
+    api_response.headers['Content-Type'] = 'application/json'
+    return api_response
+
+@app.route('/video_link')
+def fetch_video_link():
+    url = request.args.get('url')
+    response = get_video_link(url)
     if response:
         api_response = make_response(jsonify(response),200)
     api_response.headers['Content-Type'] = 'application/json'
