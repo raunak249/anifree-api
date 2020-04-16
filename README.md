@@ -44,6 +44,6 @@ It is built using Flask for python and deployed to Heroku as an app. It itself u
   * `/video_link?url=URL` :
 ```yaml
   {
-   'video_link' : driver.current_url 
+   'video_link' : URL
   }
 ```
